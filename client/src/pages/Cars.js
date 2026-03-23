@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 import Footer from "../components/Footer";
 
-const FALLBACK = "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=800&q=80";
-
 const Cars = () => {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +22,7 @@ const Cars = () => {
 
   return (
     <div>
+      {/* Header */}
       <div style={{ background:"var(--surface)", borderBottom:"1px solid var(--border)", padding:"48px 0 40px" }}>
         <div className="container">
           <div className="section-label">Fleet</div>
@@ -51,23 +50,65 @@ const Cars = () => {
 
           {!loading && filtered.length > 0 && (
             <div className="car-grid">
-              {filtered.map(car => (
-                <div className="car-card fade-up" key={car._id} onClick={() => navigate(`/cars/${car._id}`)}>
+              {filtered.map((car, i) => (
+                <div
+                  className="car-card fade-up"
+                  key={car._id || i}
+                  onClick={() => navigate(`/cars/${car._id}`)}
+                  style={{ cursor:"pointer" }}
+                >
+                  {/* Car Image */}
                   <div className="car-img-wrap">
-                    <img src={car.image?.trim() || FALLBACK} alt={car.name} onError={e => { e.target.src = FALLBACK; }} />
-                    <div className="car-avail-badge"><span className="dot-green" />Available</div>
+                    <img
+                      src={car.image}
+                      alt={car.name}
+                      onError={e => {
+                        e.target.src = "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&q=80";
+                      }}
+                    />
+                    <div className="car-avail-badge">
+                      <span className="dot-green" />Available
+                    </div>
                   </div>
+
+                  {/* Car Body */}
                   <div className="car-body">
                     <div className="car-name">{car.name}</div>
                     <div className="car-brand">{car.brand}</div>
+
+                    {/* Short Description */}
+                    {car.description && (
+                      <p style={{
+                        fontSize: "0.82rem",
+                        color: "var(--muted)",
+                        lineHeight: 1.6,
+                        margin: "10px 0 12px",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                      }}>
+                        {car.description}
+                      </p>
+                    )}
+
+                    {/* Specs */}
                     <div className="car-specs">
                       <span className="spec-item">⛽ {car.fuelType}</span>
                       <span className="spec-item">⚙️ {car.transmission}</span>
                       <span className="spec-item">🪑 {car.seats} seats</span>
                     </div>
+
+                    {/* Footer */}
                     <div className="car-footer">
-                      <div className="car-price">₹{car.pricePerDay}<span>/day</span></div>
-                      <button className="btn-primary btn-sm" onClick={e => { e.stopPropagation(); navigate(`/cars/${car._id}`); }}>
+                      <div className="car-price">
+                        ₹{car.pricePerDay}<span>/day</span>
+                      </div>
+                      <button
+                        className="btn-primary btn-sm"
+                        onClick={e => { e.stopPropagation(); navigate(`/cars/${car._id}`); }}
+                      >
                         Book Now →
                       </button>
                     </div>
