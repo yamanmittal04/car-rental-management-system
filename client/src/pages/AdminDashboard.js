@@ -145,7 +145,7 @@ const CarsTab = () => {
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ name:"", brand:"", pricePerDay:"", fuelType:"", transmission:"", seats:"", description:"", image:"", imageFile:null });
-  const token = localStorage.getItem("token");
+  
 
   const load = async () => {
     try { setLoading(true); const r = await axios.get("/cars"); setCars(Array.isArray(r.data) ? r.data : []); }
