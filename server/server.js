@@ -14,7 +14,7 @@ const app = express();
 connectDB();
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "https://car-rental-yaman.surge.sh"], credentials: true }));
 
 // Session required for passport
 app.use(session({
