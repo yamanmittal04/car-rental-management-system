@@ -10,12 +10,37 @@ exports.createBooking = async (req, res) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (start >= end) return res.status(400).json({ message: "Invalid date range" });
-    const conflict = await Booking.findOne({ car, status: { $in: ["pending", "confirmed"] }, startDate: { $lte: end }, endDate: { $gte: start } });
+    const conflict = await Booking.findOne({
+      car,
+      status: { $in: ["pending", "confirmed"] },
+      startDate: { $lte: end },
+      endDate: { $gte: start },
+    });
     if (conflict) return res.status(400).json({ message: "Car already booked for selected dates" });
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
     const totalPrice = days * carDoc.pricePerDay;
-    const booking = await Booking.create({ user: req.user._id, car, startDate: start, endDate: end, totalPrice, status: "pending" });
+    const booking = await Booking.create({
+      user: req.user._id,
+      car,
+      startDate: start,
+      endDate: end,
+      totalPrice,
+      status: "pending",
+    });
     res.status(201).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getBookedDates = async (req, res) => {
+  try {
+    const { carId } = req.params;
+    const bookings = await Booking.find({
+      car: carId,
+      status: { $in: ["pending", "confirmed"] },
+    }).select("startDate endDate");
+    res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

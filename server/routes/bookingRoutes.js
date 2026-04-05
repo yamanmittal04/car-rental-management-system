@@ -8,10 +8,12 @@ const {
   getAllBookings,
   confirmBooking,
   completeBooking,
+  getBookedDates,
 } = require("../controllers/bookingController");
 
 const { protect, admin } = require("../middleware/authMiddleware");
 
+router.get("/booked-dates/:carId", getBookedDates);
 router.post("/", protect, createBooking);
 router.get("/my", protect, getMyBookings);
 router.put("/:id/cancel", protect, cancelBooking);

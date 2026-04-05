@@ -3,6 +3,8 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "../api/axios";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const FALLBACK = "https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=800&q=80";
 
@@ -13,12 +15,16 @@ const CarDetails = () => {
   const { user } = useContext(AuthContext);
 
   const [car, setCar] = useState(null);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
+  const [bookedIntervals, setBookedIntervals] = useState([]);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Load car details
   useEffect(() => {
     axios.get("/cars")
       .then(res => {
@@ -28,9 +34,23 @@ const CarDetails = () => {
       .catch(() => toast.error("Failed to load car"));
   }, [id]);
 
+  // Load booked date ranges for this car
+  useEffect(() => {
+    axios.get(`/bookings/booked-dates/${id}`)
+      .then(res => {
+        const intervals = res.data.map(b => ({
+          start: new Date(b.startDate),
+          end: new Date(b.endDate),
+        }));
+        setBookedIntervals(intervals);
+      })
+      .catch(() => {});
+  }, [id]);
+
+  // Calculate total price
   useEffect(() => {
     if (startDate && endDate && car) {
-      const days = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000);
+      const days = Math.ceil((endDate - startDate) / 86400000);
       setTotalPrice(days > 0 ? days * car.pricePerDay : 0);
     } else {
       setTotalPrice(0);
@@ -44,7 +64,7 @@ const CarDetails = () => {
       return;
     }
     if (!startDate || !endDate) { toast.error("Please select both dates"); return; }
-    if (new Date(endDate) <= new Date(startDate)) { toast.error("End date must be after start date"); return; }
+    if (endDate <= startDate) { toast.error("End date must be after start date"); return; }
 
     try {
       setLoading(true);
@@ -71,13 +91,17 @@ const CarDetails = () => {
           {/* LEFT — IMAGE */}
           <div>
             <div className="details-img-wrap">
-              <img src={car.image?.trim() || FALLBACK} alt={car.name} onError={e => { e.target.src = FALLBACK; }} />
+              <img
+                src={car.image?.trim() || FALLBACK}
+                alt={car.name}
+                onError={e => { e.target.src = FALLBACK; }}
+              />
             </div>
-            <div className="details-specs" style={{ marginTop:24 }}>
+            <div className="details-specs" style={{ marginTop: 24 }}>
               {[
-                { icon:"⛽", val:car.fuelType, key:"Fuel" },
-                { icon:"🪑", val:`${car.seats} seats`, key:"Capacity" },
-                { icon:"⚙️", val:car.transmission, key:"Gearbox" },
+                { icon: "⛽", val: car.fuelType, key: "Fuel" },
+                { icon: "🪑", val: `${car.seats} seats`, key: "Capacity" },
+                { icon: "⚙️", val: car.transmission, key: "Gearbox" },
               ].map(s => (
                 <div className="spec-box" key={s.key}>
                   <div className="spec-box-icon">{s.icon}</div>
@@ -103,15 +127,59 @@ const CarDetails = () => {
               <div className="booking-panel-title">📅 Select Your Dates</div>
 
               <div className="date-row">
-                <div className="form-group" style={{marginBottom:0}}>
+                {/* PICK-UP DATE */}
+                <div className="form-group" style={{ marginBottom: 0 }}>
                   <label>Pick-up Date</label>
-                  <input type="date" value={startDate} min={today} onChange={e => setStartDate(e.target.value)} />
+                  <DatePicker
+                    selected={startDate}
+                    onChange={date => {
+                      setStartDate(date);
+                      if (endDate && date >= endDate) setEndDate(null);
+                    }}
+                    minDate={today}
+                    excludeDateIntervals={bookedIntervals}
+                    dateFormat="dd MMM yyyy"
+                    placeholderText="Select pick-up date"
+                    className="date-picker-input"
+                  />
                 </div>
-                <div className="form-group" style={{marginBottom:0}}>
+
+                {/* RETURN DATE */}
+                <div className="form-group" style={{ marginBottom: 0 }}>
                   <label>Return Date</label>
-                  <input type="date" value={endDate} min={startDate || today} onChange={e => setEndDate(e.target.value)} />
+                  <DatePicker
+                    selected={endDate}
+                    onChange={date => setEndDate(date)}
+                    minDate={startDate ? new Date(startDate.getTime() + 86400000) : today}
+                    excludeDateIntervals={bookedIntervals}
+                    dateFormat="dd MMM yyyy"
+                    placeholderText="Select return date"
+                    className="date-picker-input"
+                    disabled={!startDate}
+                  />
                 </div>
               </div>
+
+              {/* Legend */}
+              {bookedIntervals.length > 0 && (
+                <div style={{
+                  fontSize: "0.78rem",
+                  color: "var(--muted)",
+                  marginTop: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6
+                }}>
+                  <span style={{
+                    display: "inline-block",
+                    width: 12,
+                    height: 12,
+                    borderRadius: 3,
+                    background: "#f87171"
+                  }}></span>
+                  Highlighted dates are already booked
+                </div>
+              )}
 
               {totalPrice > 0 && (
                 <div className="total-row">
@@ -120,14 +188,21 @@ const CarDetails = () => {
                 </div>
               )}
 
-              <button className="btn-primary btn-full" onClick={handleBook} disabled={loading}>
+              <button
+                className="btn-primary btn-full"
+                onClick={handleBook}
+                disabled={loading}
+              >
                 {loading ? "Placing booking..." : user ? "Book Now →" : "Login to Book →"}
               </button>
 
               {!user && (
-                <p style={{ textAlign:"center", fontSize:"0.8rem", color:"var(--muted)", marginTop:12 }}>
+                <p style={{ textAlign: "center", fontSize: "0.8rem", color: "var(--muted)", marginTop: 12 }}>
                   You need an account to book.{" "}
-                  <span style={{ color:"var(--accent)", cursor:"pointer", fontWeight:600 }} onClick={() => navigate("/register")}>
+                  <span
+                    style={{ color: "var(--accent)", cursor: "pointer", fontWeight: 600 }}
+                    onClick={() => navigate("/register")}
+                  >
                     Register free →
                   </span>
                 </p>
@@ -139,4 +214,5 @@ const CarDetails = () => {
     </div>
   );
 };
+
 export default CarDetails;
