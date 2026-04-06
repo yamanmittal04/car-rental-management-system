@@ -3,7 +3,13 @@ import axios from "../api/axios";
 import toast from "react-hot-toast";
 import Footer from "../components/Footer";
 
-const fmt = d => new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" });
+const fmt = d => new Date(d).toLocaleString("en-IN", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 const statusClass = s => ({ pending:"badge-pending", confirmed:"badge-confirmed", cancelled:"badge-cancelled", completed:"badge-completed" }[s] || "");
 
@@ -69,8 +75,9 @@ const MyBookings = () => {
                     <span className={`badge ${statusClass(b.status)}`}>{b.status}</span>
                   </div>
 
-                  <div className="booking-meta">
-                    📅 {fmt(b.startDate)} → {fmt(b.endDate)}
+                  <div className="booking-meta" style={{ lineHeight: "1.8" }}>
+                    <div>🕐 <strong>Pick-up:</strong> {fmt(b.startDate)}</div>
+                    <div>🕐 <strong>Return:</strong> {fmt(b.endDate)}</div>
                   </div>
 
                   <div className="booking-price-val">₹{b.totalPrice}</div>
@@ -104,4 +111,5 @@ const MyBookings = () => {
     </div>
   );
 };
+
 export default MyBookings;

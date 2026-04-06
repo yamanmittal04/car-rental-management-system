@@ -47,10 +47,12 @@ const CarDetails = () => {
       .catch(() => {});
   }, [id]);
 
-  // Calculate total price
+  // Calculate total price based on hours → days
   useEffect(() => {
     if (startDate && endDate && car) {
-      const days = Math.ceil((endDate - startDate) / 86400000);
+      const diffMs = endDate - startDate;
+      const diffHours = diffMs / (1000 * 60 * 60);
+      const days = Math.ceil(diffHours / 24);
       setTotalPrice(days > 0 ? days * car.pricePerDay : 0);
     } else {
       setTotalPrice(0);
@@ -63,8 +65,8 @@ const CarDetails = () => {
       navigate("/login", { state: { from: location } });
       return;
     }
-    if (!startDate || !endDate) { toast.error("Please select both dates"); return; }
-    if (endDate <= startDate) { toast.error("End date must be after start date"); return; }
+    if (!startDate || !endDate) { toast.error("Please select both date and time"); return; }
+    if (endDate <= startDate) { toast.error("Return time must be after pick-up time"); return; }
 
     try {
       setLoading(true);
@@ -124,12 +126,12 @@ const CarDetails = () => {
             </div>
 
             <div className="booking-panel">
-              <div className="booking-panel-title">📅 Select Your Dates</div>
+              <div className="booking-panel-title">📅 Select Your Dates & Time</div>
 
               <div className="date-row">
-                {/* PICK-UP DATE */}
+                {/* PICK-UP DATE & TIME */}
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Pick-up Date</label>
+                  <label>Pick-up Date & Time</label>
                   <DatePicker
                     selected={startDate}
                     onChange={date => {
@@ -138,22 +140,30 @@ const CarDetails = () => {
                     }}
                     minDate={today}
                     excludeDateIntervals={bookedIntervals}
-                    dateFormat="dd MMM yyyy"
-                    placeholderText="Select pick-up date"
+                    showTimeSelect
+                    timeFormat="h:mm aa"
+                    timeIntervals={60}
+                    timeCaption="Time"
+                    dateFormat="dd MMM yyyy, h:mm aa"
+                    placeholderText="Select date & time"
                     className="date-picker-input"
                   />
                 </div>
 
-                {/* RETURN DATE */}
+                {/* RETURN DATE & TIME */}
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Return Date</label>
+                  <label>Return Date & Time</label>
                   <DatePicker
                     selected={endDate}
                     onChange={date => setEndDate(date)}
-                    minDate={startDate ? new Date(startDate.getTime() + 86400000) : today}
+                    minDate={startDate ? new Date(startDate.getTime() + 3600000) : today}
                     excludeDateIntervals={bookedIntervals}
-                    dateFormat="dd MMM yyyy"
-                    placeholderText="Select return date"
+                    showTimeSelect
+                    timeFormat="h:mm aa"
+                    timeIntervals={60}
+                    timeCaption="Time"
+                    dateFormat="dd MMM yyyy, h:mm aa"
+                    placeholderText="Select date & time"
                     className="date-picker-input"
                     disabled={!startDate}
                   />
@@ -175,9 +185,33 @@ const CarDetails = () => {
                     width: 12,
                     height: 12,
                     borderRadius: 3,
-                    background: "#f87171"
+                    background: "#fee2e2",
+                    border: "1px solid #ef4444"
                   }}></span>
                   Highlighted dates are already booked
+                </div>
+              )}
+
+              {/* Booking summary */}
+              {startDate && endDate && totalPrice > 0 && (
+                <div style={{
+                  background: "#f0f4ff",
+                  border: "1px solid #c7d2fe",
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  marginTop: 12,
+                  fontSize: "0.85rem",
+                  color: "#3730a3"
+                }}>
+                  <div style={{ marginBottom: 4 }}>
+                    🕐 <strong>Pick-up:</strong> {startDate.toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                  <div style={{ marginBottom: 4 }}>
+                    🕐 <strong>Return:</strong> {endDate.toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                  <div style={{ borderTop: "1px solid #c7d2fe", marginTop: 8, paddingTop: 8 }}>
+                    📅 <strong>Duration:</strong> {Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))} day(s)
+                  </div>
                 </div>
               )}
 

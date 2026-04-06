@@ -421,3 +421,33 @@ label{display:block;font-size:0.78rem;font-weight:600;color:var(--muted);text-tr
 .react-datepicker__triangle {
   display: none !important;
 }
+/* ── Time picker styles ── */
+.react-datepicker__time-container {
+  border-left: 1px solid #e5e7eb !important;
+}
+
+.react-datepicker__time-container .react-datepicker__time {
+  background: #ffffff !important;
+}
+
+.react-datepicker__time-container .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  color: #111827 !important;
+  font-size: 13px !important;
+  padding: 6px 10px !important;
+}
+
+.react-datepicker__time-container .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background: #eff2ff !important;
+  color: #3b5bdb !important;
+}
+
+.react-datepicker__time-container .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background: #3b5bdb !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker-time__header {
+  color: #111827 !important;
+  font-size: 13px !important;
+}
