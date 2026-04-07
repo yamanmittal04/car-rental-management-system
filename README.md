@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js" />
 <img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb" />
 <img src="https://img.shields.io/badge/Cloudinary-Image%20Hosting-3448C5?style=for-the-badge&logo=cloudinary" />
-<img src="https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens" />
+<img src="https://img.shields.io/badge/JWT-Auth-4285F4?style=for-the-badge&logo=jsonwebtokens&logoColor=white" />
 <img src="https://img.shields.io/badge/Google-OAuth%202.0-4285F4?style=for-the-badge&logo=google" />
 
 <br/><br/>
