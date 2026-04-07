@@ -202,7 +202,7 @@ User ──► Register/Login ──► JWT Issued ──► Stored in localStor
 
 | Home Page | Car Listing | Admin Dashboard |
 |-----------|-------------|-----------------|
-| ![Home]() | ![Cars]()   | ![Admin]()      |
+| ![Home](client/public/screenshots/home.png) | ![Cars](client/public/screenshots/cars.png) | ![Admin](client/public/screenshots/admin.png) |
 
 ---
 
